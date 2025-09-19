@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Menù Digitale</title>
+</head>
+<body>
+  <h1>Area Admin</h1>
+  <p>Carica il nuovo menù in PDF (rinominato <b>current.pdf</b>):</p>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Carica</button>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+
+    // Inserisci qui le chiavi del tuo progetto Supabase
+    const supabaseUrl = "https://<PROJECT-ID>.supabase.co"
+    const supabaseKey = "<ANON-KEY-QUI>"
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    async function uploadFile() {
+      const file = document.getElementById('fileInput').files[0]
+      if (!file) {
+        alert("Seleziona un file PDF prima di caricare!")
+        return
+      }
+      const { data, error } = await supabase.storage
+        .from('menu')
+        .upload('current.pdf', file, { upsert: true })
+
+      if (error) {
+        alert("Errore durante il caricamento: " + error.message)
+      } else {
+        alert("Menù aggiornato con successo!")
+      }
+    }
+  </script>
+</body>
+</html>
