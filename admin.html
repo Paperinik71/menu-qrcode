@@ -1,39 +1,148 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Menù Digitale</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Area Admin</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; padding: 24px; line-height: 1.5; }
+    h1 { margin-bottom: 4px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; max-width: 560px; }
+    label { display:block; margin-top:10px; font-weight:600; }
+    input[type="email"], input[type="password"], input[type="file"] { width:100%; padding:8px; margin-top:6px; }
+    button { margin-top:12px; padding:10px 16px; cursor:pointer; }
+    .muted { color:#666; font-size: 14px; }
+    .row { display:flex; gap:12px; align-items:center; }
+    .ok { color: #118000; font-weight:600; }
+    .err { color: #b00000; font-weight:600; }
+    .hidden { display:none; }
+  </style>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h1>Area Admin</h1>
-  <p>Carica il nuovo menù in PDF (rinominato <b>current.pdf</b>):</p>
-  <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Carica</button>
+  <p class="muted">Carica il nuovo menù in PDF (verrà salvato come <strong>current.pdf</strong> nel bucket <code>menu</code>).</p>
 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+  <div class="card" id="loginCard">
+    <h3>Accesso</h3>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="email@dominio.it" />
+    <label>Password</label>
+    <input id="password" type="password" placeholder="••••••••" />
+    <div class="row">
+      <button id="btnLogin">Accedi</button>
+      <span id="loginMsg" class="muted"></span>
+    </div>
+  </div>
 
-    // Inserisci qui le chiavi del tuo progetto Supabase
-    const supabaseUrl = "https://<PROJECT-ID>.supabase.co"
-    const supabaseKey = "<ANON-KEY-QUI>"
-    const supabase = createClient(supabaseUrl, supabaseKey)
+  <div class="card hidden" id="uploadCard">
+    <div class="row" style="justify-content:space-between">
+      <h3 style="margin:0">Upload Menù</h3>
+      <button id="btnLogout" title="Esci">Esci</button>
+    </div>
+    <p class="muted" id="whoami"></p>
 
-    async function uploadFile() {
-      const file = document.getElementById('fileInput').files[0]
-      if (!file) {
-        alert("Seleziona un file PDF prima di caricare!")
-        return
+    <label>Seleziona PDF</label>
+    <input id="fileInput" type="file" accept="application/pdf" />
+    <button id="btnUpload">Carica</button>
+    <p id="uploadMsg" class="muted"></p>
+
+    <hr/>
+    <p>
+      Anteprima menù pubblico: 
+      <a href="https://paperinik71.github.io/menu-qrcode/menu.html" target="_blank">apri</a>
+    </p>
+  </div>
+
+  <script>
+    // ⬇️ INSERISCI QUI I TUOI VALORI (da Supabase → Settings → API)
+    const SUPABASE_URL = "https://rmcpjpwfaiocqnduounn.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3BqcHdmYWlvY3FuZHVvdW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODAyMzUsImV4cCI6MjA3Mzg1NjIzNX0.O7F_79IZBg_BGmhHXeudpTYha3buT9C4XvwkAkGd_24";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loginCard = document.getElementById('loginCard');
+    const uploadCard = document.getElementById('uploadCard');
+    const whoami = document.getElementById('whoami');
+
+    const emailEl = document.getElementById('email');
+    const passEl  = document.getElementById('password');
+    const loginMsg = document.getElementById('loginMsg');
+
+    const fileInput = document.getElementById('fileInput');
+    const uploadMsg = document.getElementById('uploadMsg');
+
+    document.getElementById('btnLogin').addEventListener('click', login);
+    document.getElementById('btnUpload').addEventListener('click', uploadPdf);
+    document.getElementById('btnLogout').addEventListener('click', logout);
+
+    init();
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        showUpload(user);
+      } else {
+        showLogin();
       }
-      const { data, error } = await supabase.storage
+    }
+
+    function showLogin() {
+      loginCard.classList.remove('hidden');
+      uploadCard.classList.add('hidden');
+    }
+    function showUpload(user) {
+      whoami.textContent = `Loggato come: ${user.email}`;
+      loginCard.classList.add('hidden');
+      uploadCard.classList.remove('hidden');
+    }
+
+    async function login() {
+      loginMsg.textContent = "Accesso in corso…";
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        loginMsg.innerHTML = `<span class="err">Errore login: ${error.message}</span>`;
+        return;
+      }
+      loginMsg.innerHTML = `<span class="ok">Login ok.</span>`;
+      showUpload(data.user);
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      showLogin();
+    }
+
+    async function uploadPdf() {
+      uploadMsg.textContent = "";
+      const file = fileInput.files[0];
+      if (!file) {
+        uploadMsg.innerHTML = `<span class="err">Seleziona un file PDF.</span>`;
+        return;
+      }
+      if (file.type !== "application/pdf") {
+        uploadMsg.innerHTML = `<span class="err">Il file deve essere un PDF.</span>`;
+        return;
+      }
+
+      // Scrive sempre nello stesso percorso: menu/current.pdf
+      const { error } = await supabase
+        .storage
         .from('menu')
-        .upload('current.pdf', file, { upsert: true })
+        .upload('current.pdf', file, {
+          upsert: true,
+          cacheControl: '0',
+          contentType: 'application/pdf'
+        });
 
       if (error) {
-        alert("Errore durante il caricamento: " + error.message)
-      } else {
-        alert("Menù aggiornato con successo!")
+        uploadMsg.innerHTML = `<span class="err">Errore upload: ${error.message}</span>`;
+        return;
       }
+      uploadMsg.innerHTML = `<span class="ok">Caricato! Aggiorna la pagina del menù pubblico per vedere il nuovo PDF.</span>`;
     }
   </script>
 </body>
