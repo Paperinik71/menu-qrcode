@@ -1,149 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Area Admin</title>
-  <style>
-    body { font-family: system-ui, Arial, sans-serif; padding: 24px; line-height: 1.5; }
-    h1 { margin-bottom: 4px; }
-    .card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; max-width: 560px; }
-    label { display:block; margin-top:10px; font-weight:600; }
-    input[type="email"], input[type="password"], input[type="file"] { width:100%; padding:8px; margin-top:6px; }
-    button { margin-top:12px; padding:10px 16px; cursor:pointer; }
-    .muted { color:#666; font-size: 14px; }
-    .row { display:flex; gap:12px; align-items:center; }
-    .ok { color: #118000; font-weight:600; }
-    .err { color: #b00000; font-weight:600; }
-    .hidden { display:none; }
-  </style>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
-<body>
-  <h1>Area Admin</h1>
-  <p class="muted">Carica il nuovo menù in PDF (verrà salvato come <strong>current.pdf</strong> nel bucket <code>menu</code>).</p>
-
-  <div class="card" id="loginCard">
-    <h3>Accesso</h3>
-    <label>Email</label>
-    <input id="email" type="email" placeholder="email@dominio.it" />
-    <label>Password</label>
-    <input id="password" type="password" placeholder="••••••••" />
-    <div class="row">
-      <button id="btnLogin">Accedi</button>
-      <span id="loginMsg" class="muted"></span>
-    </div>
-  </div>
-
-  <div class="card hidden" id="uploadCard">
-    <div class="row" style="justify-content:space-between">
-      <h3 style="margin:0">Upload Menù</h3>
-      <button id="btnLogout" title="Esci">Esci</button>
-    </div>
-    <p class="muted" id="whoami"></p>
-
-    <label>Seleziona PDF</label>
-    <input id="fileInput" type="file" accept="application/pdf" />
-    <button id="btnUpload">Carica</button>
-    <p id="uploadMsg" class="muted"></p>
-
-    <hr/>
-    <p>
-      Anteprima menù pubblico: 
-      <a href="https://paperinik71.github.io/menu-qrcode/menu.html" target="_blank">apri</a>
-    </p>
-  </div>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POKE ♥ LOVE — Admin Menù</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // ⬇️ INSERISCI QUI I TUOI VALORI (da Supabase → Settings → API)
+    tailwind.config = { theme:{ extend:{ fontFamily:{ display:['Inter','system-ui','sans-serif'], body:['Inter','system-ui','sans-serif'] } } } }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white">
+  <!-- Decor -->
+  <div class="pointer-events-none fixed inset-0 -z-10">
+    <div class="absolute inset-x-0 top-[-6rem] -z-10 transform-gpu overflow-hidden blur-3xl" aria-hidden="true">
+      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-400 to-rose-500 opacity-20" style="clip-path:polygon(74% 44%,100% 68%,97% 100%,46% 86%,0 100%,0 0,43% 0,58% 15%)"></div>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-2xl px-6 py-12">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">POKE <span class="text-red-500">♥</span> LOVE — Amministrazione</h1>
+      <p class="text-white/70 text-sm">Carica qui il nuovo menù PDF. Il link pubblico si aggiorna automaticamente.</p>
+      <p id="lastUpdate" class="text-xs text-gray-400 italic mt-2">Ultimo upload: —</p>
+      <p class="text-xs text-gray-400">Link pubblico PDF: <a id="publicLink" class="underline" target="_blank" rel="noopener"></a></p>
+    </header>
+
+    <!-- Login -->
+    <section id="loginCard" class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-3">Accesso</h2>
+      <div class="grid gap-3">
+        <input id="email" type="email" placeholder="Email" class="bg-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400/40">
+        <input id="password" type="password" placeholder="Password" class="bg-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400/40">
+        <button id="loginBtn" class="rounded-xl px-4 py-3 bg-amber-400 text-slate-900 font-medium hover:bg-amber-300">Entra</button>
+      </div>
+      <p id="loginMsg" class="text-sm text-white/70 mt-3"></p>
+    </section>
+
+    <!-- Uploader -->
+    <section id="uploaderCard" class="hidden bg-white/5 border border-white/10 rounded-2xl p-6">
+      <h2 class="text-lg font-semibold mb-3">Carica nuovo menù (PDF)</h2>
+      <input id="fileInput" type="file" accept="application/pdf" class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-4 file:py-2 file:bg-white/10 file:text-white hover:file:bg-white/15" />
+      <div class="flex items-center gap-3 mt-4">
+        <button id="uploadBtn" class="rounded-xl px-4 py-3 bg-amber-400 text-slate-900 font-medium hover:bg-amber-300">Carica / Sostituisci</button>
+        <span id="progress" class="text-sm text-white/70"></span>
+      </div>
+      <p id="uploadMsg" class="text-sm text-white/70 mt-3"></p>
+    </section>
+
+    <div class="mt-8">
+      <a href="./index.html" class="underline text-white/80">↩ Torna al menù</a>
+    </div>
+  </main>
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // === CONFIG ===
     const SUPABASE_URL = "https://rmcpjpwfaiocqnduounn.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3BqcHdmYWlvY3FuZHVvdW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODAyMzUsImV4cCI6MjA3Mzg1NjIzNX0.O7F_79IZBg_BGmhHXeudpTYha3buT9C4XvwkAkGd_24";
+    const BUCKET = "menu";
+    const OBJECT = "current.pdf";
+    const PUBLIC_URL = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${OBJECT}`;
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const loginCard = document.getElementById('loginCard');
-    const uploadCard = document.getElementById('uploadCard');
-    const whoami = document.getElementById('whoami');
+    // UI refs
+    const loginCard = document.querySelector('#loginCard');
+    const uploaderCard = document.querySelector('#uploaderCard');
+    const loginMsg = document.querySelector('#loginMsg');
+    const uploadMsg = document.querySelector('#uploadMsg');
+    const progress = document.querySelector('#progress');
+    const lastUpdateEl = document.querySelector('#lastUpdate');
+    const publicLink = document.querySelector('#publicLink');
 
-    const emailEl = document.getElementById('email');
-    const passEl  = document.getElementById('password');
-    const loginMsg = document.getElementById('loginMsg');
+    publicLink.textContent = PUBLIC_URL;
+    publicLink.href = PUBLIC_URL;
 
-    const fileInput = document.getElementById('fileInput');
-    const uploadMsg = document.getElementById('uploadMsg');
+    async function refreshLastModified(){
+      try{
+        const res = await fetch(PUBLIC_URL, { method:'HEAD', cache:'no-store' });
+        const lm = res.headers.get('Last-Modified');
+        if (lm) lastUpdateEl.textContent = 'Ultimo upload: ' + new Date(lm).toLocaleString('it-IT');
+      }catch(e){}
+    }
 
-    document.getElementById('btnLogin').addEventListener('click', login);
-    document.getElementById('btnUpload').addEventListener('click', uploadPdf);
-    document.getElementById('btnLogout').addEventListener('click', logout);
-
-    init();
-
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        showUpload(user);
-      } else {
-        showLogin();
+    // Login
+    document.querySelector('#loginBtn').addEventListener('click', async () => {
+      loginMsg.textContent = 'Accesso in corso…';
+      const email = document.querySelector('#email').value.trim();
+      const password = document.querySelector('#password').value;
+      try {
+        const { error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        loginMsg.textContent = 'Accesso riuscito ✅';
+        loginCard.classList.add('hidden');
+        uploaderCard.classList.remove('hidden');
+      } catch (e) {
+        loginMsg.textContent = 'Errore login: ' + (e.message || e);
       }
-    }
+    });
 
-    function showLogin() {
-      loginCard.classList.remove('hidden');
-      uploadCard.classList.add('hidden');
-    }
-    function showUpload(user) {
-      whoami.textContent = `Loggato come: ${user.email}`;
-      loginCard.classList.add('hidden');
-      uploadCard.classList.remove('hidden');
-    }
+    // Upload
+    document.querySelector('#uploadBtn').addEventListener('click', async () => {
+      const file = document.querySelector('#fileInput').files[0];
+      if (!file) { uploadMsg.textContent = 'Seleziona un PDF.'; return; }
+      if (file.type !== 'application/pdf'){ uploadMsg.textContent = 'Il file deve essere un PDF.'; return; }
 
-    async function login() {
-      loginMsg.textContent = "Accesso in corso…";
-      const email = emailEl.value.trim();
-      const password = passEl.value;
+      uploadMsg.textContent = '';
+      progress.textContent = 'Caricamento…';
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        loginMsg.innerHTML = `<span class="err">Errore login: ${error.message}</span>`;
-        return;
+      try{
+        const { error } = await client.storage.from(BUCKET)
+          .upload(OBJECT, file, { upsert: true, cacheControl: '0', contentType: 'application/pdf' });
+        if (error) throw error;
+
+        progress.textContent = '';
+        uploadMsg.textContent = 'Caricato con successo ✅';
+        await refreshLastModified();
+      }catch(e){
+        progress.textContent = '';
+        uploadMsg.textContent = 'Errore upload: ' + (e.message || e);
       }
-      loginMsg.innerHTML = `<span class="ok">Login ok.</span>`;
-      showUpload(data.user);
-    }
+    });
 
-    async function logout() {
-      await supabase.auth.signOut();
-      showLogin();
-    }
-
-    async function uploadPdf() {
-      uploadMsg.textContent = "";
-      const file = fileInput.files[0];
-      if (!file) {
-        uploadMsg.innerHTML = `<span class="err">Seleziona un file PDF.</span>`;
-        return;
-      }
-      if (file.type !== "application/pdf") {
-        uploadMsg.innerHTML = `<span class="err">Il file deve essere un PDF.</span>`;
-        return;
-      }
-
-      // Scrive sempre nello stesso percorso: menu/current.pdf
-      const { error } = await supabase
-        .storage
-        .from('menu')
-        .upload('current.pdf', file, {
-          upsert: true,
-          cacheControl: '0',
-          contentType: 'application/pdf'
-        });
-
-      if (error) {
-        uploadMsg.innerHTML = `<span class="err">Errore upload: ${error.message}</span>`;
-        return;
-      }
-      uploadMsg.innerHTML = `<span class="ok">Caricato! Aggiorna la pagina del menù pubblico per vedere il nuovo PDF.</span>`;
-    }
+    refreshLastModified();
   </script>
 </body>
 </html>

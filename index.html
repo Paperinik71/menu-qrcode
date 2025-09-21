@@ -5,17 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>POKE ♥ LOVE — Menù</title>
   <meta name="description" content="Menù digitale aggiornato in tempo reale" />
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            display: ['Inter', 'system-ui', 'sans-serif'],
-            body: ['Inter', 'system-ui', 'sans-serif']
-          }
+          fontFamily:{ display:['Inter','system-ui','sans-serif'], body:['Inter','system-ui','sans-serif'] }
         }
       }
     }
@@ -23,42 +18,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="./favicon.png" />
-
   <style>
-    .fade-in { animation: fadeIn 0.6s ease-out both; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .shimmer { background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.35), rgba(255,255,255,0)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .fade-in{animation:fadeIn .6s ease-out both}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .shimmer{background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.35),rgba(255,255,255,0));background-size:200% 100%;animation:shimmer 1.2s infinite}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white font-body">
-  <!-- Decor light -->
+<body class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white">
+  <!-- Decor -->
   <div class="pointer-events-none fixed inset-0 -z-10">
     <div class="absolute inset-x-0 top-[-6rem] -z-10 transform-gpu overflow-hidden blur-3xl" aria-hidden="true">
-      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-400 to-rose-500 opacity-20" style="clip-path: polygon(74% 44%, 100% 68%, 97% 100%, 46% 86%, 0 100%, 0 0, 43% 0, 58% 15%)"></div>
+      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-400 to-rose-500 opacity-20" style="clip-path:polygon(74% 44%,100% 68%,97% 100%,46% 86%,0 100%,0 0,43% 0,58% 15%)"></div>
     </div>
   </div>
 
   <main class="mx-auto max-w-3xl px-6 py-12 fade-in">
-    <!-- Header -->
-    <header class="flex items-start gap-4 mb-8">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight">POKE <span class="text-red-500">♥</span> LOVE</h1>
-        <p class="text-white/70 text-sm">Scansiona il QR o clicca per aprire il menù aggiornato</p>
-      </div>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">POKE <span class="text-red-500">♥</span> LOVE</h1>
+      <p class="text-white/70 text-sm">Scansiona il QR o clicca per aprire il menù aggiornato</p>
     </header>
 
-    <!-- Card -->
     <section class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-2xl">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div class="flex-1">
           <h2 class="text-xl font-semibold mb-2">Menù corrente</h2>
           <p id="status" class="text-white/70 text-sm mb-1">Preparazione del link…</p>
-          <p id="lastUpdate" class="text-xs text-gray-400 italic">Ultimo aggiornamento: 21/09/2025</p>
+          <p id="lastUpdate" class="text-xs text-gray-400 italic">Ultimo aggiornamento: —</p>
         </div>
         <div class="flex items-center gap-3">
-          <button id="openBtn" class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium bg-amber-400 text-slate-900 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400/40 disabled:opacity-50 disabled:cursor-not-allowed">Apri il Menù</button>
+          <button id="openBtn" class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium bg-amber-400 text-slate-900 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400/40">Apri il Menù</button>
           <a id="adminBtn" href="./admin.html" class="hidden md:inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-medium bg-white/10 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20">Admin</a>
         </div>
       </div>
@@ -72,7 +59,7 @@
       <div id="skeleton" class="mt-6 h-64 rounded-xl bg-white/5 shimmer"></div>
 
       <div class="mt-4 flex items-center justify-between text-xs text-white/60">
-        <span>Ultimo aggiornamento: <time id="now"></time></span>
+        <span>Ora: <time id="now"></time></span>
         <label class="inline-flex items-center gap-2 cursor-pointer select-none">
           <input id="autoOpenToggle" type="checkbox" class="accent-amber-400" />
           <span>Apri automaticamente quando possibile</span>
@@ -81,97 +68,68 @@
     </section>
 
     <section class="mt-8 text-white/70 text-sm space-y-2">
-      <p><strong>Tip:</strong> QR diretto al PDF: usa <code>?auto=1</code>. Per mostrare il bottone admin nella stessa pagina: <code>?admin=1</code>. Puoi combinarli.</p>
-      <details class="open:bg-white/5 open:ring-1 open:ring-white/10 open:rounded-xl p-4">
-        <summary class="cursor-pointer text-white">Configurazione (Supabase o fallback)</summary>
-        <ul class="list-disc pl-5 mt-2 space-y-1">
-          <li>Se imposti correttamente <code>data-supabase-url</code> e il bucket pubblico, la pagina userà Supabase.</li>
-          <li>Se non è configurato, i pulsanti usano il <em>fallback</em> <code>menu.html</code>.</li>
-        </ul>
-      </details>
+      <p><strong>Tip:</strong> Per far aprire il PDF direttamente con il QR usa il link Supabase del file <code>current.pdf</code>.</p>
+      <p>Mostra il pulsante Admin in questa pagina con <code>?admin=1</code> (es. <code>…/index.html?admin=1</code>).</p>
     </section>
   </main>
 
-  <!-- Config: Sostituisci con i tuoi valori; lasciare così se vuoi usare il fallback menu.html -->
+  <!-- CONFIG SUPABASE -->
   <div id="menuConfig"
-     data-supabase-url=""
-     data-bucket="menu"
-     data-object="current.pdf"
-     class="hidden"></div>
+       data-supabase-url="https://rmcpjpwfaiocqnduounn.supabase.co"
+       data-bucket="menu"
+       data-object="current.pdf"
+       class="hidden"></div>
 
   <script>
     (function(){
       const $ = (s) => document.querySelector(s);
+
       const cfgEl = $('#menuConfig');
       const SUPABASE_URL = cfgEl?.dataset?.supabaseUrl || '';
       const BUCKET = cfgEl?.dataset?.bucket || 'menu';
       const OBJECT = cfgEl?.dataset?.object || 'current.pdf';
 
-      const FALLBACK_URL = './menu.html'; // funziona subito anche senza Supabase
-
       const openBtn = $('#openBtn');
-      const downloadBtn = $('#downloadBtn');
       const adminBtn = $('#adminBtn');
       const statusEl = $('#status');
       const viewerWrap = $('#viewerWrap');
       const pdfViewer = $('#pdfViewer');
       const skeleton = $('#skeleton');
       const autoToggle = $('#autoOpenToggle');
+      const nowEl = $('#now'); nowEl.textContent = new Date().toLocaleString('it-IT');
 
-      const nowEl = $('#now');
-      nowEl.textContent = new Date().toLocaleString('it-IT');
-
-      const supaUrl = [SUPABASE_URL, 'storage', 'v1', 'object', 'public', BUCKET, OBJECT]
-        .filter(Boolean)
-        .join('/');
-
+      const FALLBACK_URL = './menu.html'; // se Supabase non è valido
+      const supaUrl = [SUPABASE_URL,'storage','v1','object','public',BUCKET,OBJECT].filter(Boolean).join('/');
       const valid = /^https?:\/\//.test(SUPABASE_URL);
-      const finalUrl = FALLBACK_URL; // forza sempre menu.html
+      const finalUrl = valid ? supaUrl : FALLBACK_URL;
 
-      function showViewer(){
-        if (!finalUrl) return;
-        viewerWrap.classList.remove('hidden');
-        pdfViewer.setAttribute('data', finalUrl);
-      }
+      function done(msg){ skeleton.classList.add('hidden'); statusEl.textContent = msg || 'Pronto.'; }
+      function showViewer(){ if(!finalUrl) return; viewerWrap.classList.remove('hidden'); pdfViewer.setAttribute('data', finalUrl); }
+      function tryAutoOpen(){ const p=new URLSearchParams(location.search); const wants=p.get('auto')==='1'||autoToggle.checked; if(wants&&finalUrl){ setTimeout(()=>location.assign(finalUrl),120);} }
 
-      function doneLoading(msg){
-        skeleton.classList.add('hidden');
-        statusEl.textContent = msg || 'Pronto.';
-      }
-
-      function tryAutoOpen(){
-        const params = new URLSearchParams(location.search);
-        const wantsAuto = params.get('auto') === '1' || autoToggle.checked;
-        if (wantsAuto && finalUrl){ setTimeout(() => { location.assign(finalUrl); }, 120); }
-      }
-
-      // Init
-      openBtn.addEventListener('click', () => location.assign(finalUrl));
-      
+      // Bottoni
+      openBtn.addEventListener('click', ()=> location.assign(finalUrl));
       const params = new URLSearchParams(location.search);
-      if (params.get('admin') === '1') { adminBtn.classList.remove('hidden'); }
+      if (params.get('admin') === '1') adminBtn.classList.remove('hidden');
+
+      // Ultimo aggiornamento (header Last-Modified del file pubblico)
+      (async ()=>{
+        const lastEl = $('#lastUpdate');
+        try{
+          const res = await fetch(finalUrl, { method:'HEAD', cache:'no-store' });
+          const d = res.headers.get('Last-Modified');
+          if (d) lastEl.textContent = 'Ultimo aggiornamento: ' + new Date(d).toLocaleString('it-IT');
+        }catch(e){ /* silenzio */ }
+      })();
 
       showViewer();
-      doneLoading(valid ? 'Link Supabase pronto.' : 'Supabase non configurato, uso menu.html');
-      // Mostra data ultimo aggiornamento
-const lastUpdateEl = document.querySelector('#lastUpdate');
-if (lastUpdateEl) lastUpdateEl.textContent = "Ultimo aggiornamento: 21/09/2025";
-
+      done(valid ? 'Link Supabase pronto.' : 'Supabase non configurato, uso menu.html');
       tryAutoOpen();
 
-      // Persist toggle in localStorage
-      const key = 'menu:autoOpen';
-      if (localStorage.getItem(key) === '1') autoToggle.checked = true;
-      autoToggle.addEventListener('change', (e) => {
-        localStorage.setItem(key, e.target.checked ? '1' : '0');
-      });
+      const key='menu:autoOpen';
+      if(localStorage.getItem(key)==='1') autoToggle.checked=true;
+      autoToggle.addEventListener('change', e=>localStorage.setItem(key, e.target.checked?'1':'0'));
     })();
   </script>
 </body>
 </html>
-
-
-
-
-
-
