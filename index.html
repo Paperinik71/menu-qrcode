@@ -126,7 +126,7 @@
         .join('/');
 
       const valid = /^https?:\/\//.test(SUPABASE_URL);
-      const finalUrl = valid ? supaUrl : FALLBACK_URL;
+      const finalUrl = FALLBACK_URL; // forza sempre menu.html
 
       function showViewer(){
         if (!finalUrl) return;
@@ -167,4 +167,5 @@
   </script>
 </body>
 </html>
+
 
