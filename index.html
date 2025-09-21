@@ -147,9 +147,7 @@
 
       // Init
       openBtn.addEventListener('click', () => location.assign(finalUrl));
-      downloadBtn.classList.remove('hidden');
-      downloadBtn.setAttribute('href', finalUrl);
-
+      
       const params = new URLSearchParams(location.search);
       if (params.get('admin') === '1') { adminBtn.classList.remove('hidden'); }
 
@@ -171,6 +169,7 @@ if (lastUpdateEl) lastUpdateEl.textContent = "Ultimo aggiornamento: 21/09/2025";
   </script>
 </body>
 </html>
+
 
 
 
