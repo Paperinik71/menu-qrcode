@@ -156,6 +156,10 @@
 
       showViewer();
       doneLoading(valid ? 'Link Supabase pronto.' : 'Supabase non configurato, uso menu.html');
+      // Mostra data ultimo aggiornamento
+const lastUpdateEl = document.querySelector('#lastUpdate');
+if (lastUpdateEl) lastUpdateEl.textContent = "Ultimo aggiornamento: 21/09/2025";
+
       tryAutoOpen();
 
       // Persist toggle in localStorage
@@ -168,6 +172,7 @@
   </script>
 </body>
 </html>
+
 
 
 
