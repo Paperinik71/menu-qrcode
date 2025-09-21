@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menù del Ristorante</title>
+  <meta name="description" content="Menù digitale aggiornato in tempo reale" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config: font & color tweaks
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Inter', 'system-ui', 'sans-serif'],
+            body: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Favicon placeholder (replace with your logo) -->
+  <link rel="icon" href="./favicon.png" />
+
+  <style>
+    /* Smooth fade-in */
+    .fade-in { animation: fadeIn 0.6s ease-out both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Simple shimmer for skeleton */
+    .shimmer { background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.35), rgba(255,255,255,0)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white font-body">
+  <!-- Top decoration -->
+  <div class="pointer-events-none fixed inset-0 -z-10">
+    <div class="absolute inset-x-0 top-[-6rem] -z-10 transform-gpu overflow-hidden blur-3xl" aria-hidden="true">
+      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-400 to-rose-500 opacity-20" style="clip-path: polygon(74% 44%, 100% 68%, 97% 100%, 46% 86%, 0 100%, 0 0, 43% 0, 58% 15%)"></div>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-3xl px-6 py-12 fade-in">
+    <!-- Header / Branding -->
+    <header class="flex items-center gap-4 mb-8">
+      <img src="./logo.svg" alt="Logo Ristorante" class="h-12 w-12 rounded-xl ring-1 ring-white/10" onerror="this.style.display='none'" />
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">POKE ❤️ LOVE • Menù Digitale</h1>
+        <p class="text-white/70 text-sm">Scansiona il QR o clicca per aprire il menù aggiornato</p>
+      </div>
+    </header>
+
+    <!-- Card -->
+    <section class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="flex-1">
+          <h2 class="text-xl font-semibold mb-2">Menù corrente</h2>
+          <p id="status" class="text-white/70 text-sm">Preparazione del link…</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="openBtn" class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium bg-amber-400 text-slate-900 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400/40 disabled:opacity-50 disabled:cursor-not-allowed">Apri il Menù</button>
+          <a id="downloadBtn" class="hidden md:inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-medium bg-white/10 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20" download>Scarica PDF</a>
+          <!-- Admin button: compare solo con ?admin=1 -->
+          <a id="adminBtn" href="./admin.html" class="hidden md:inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-medium bg-white/10 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20">Admin</a>
+        </div>
+      </div>
+
+      <!-- PDF Embed (fallback / preview) -->
+      <div id="viewerWrap" class="mt-6 hidden">
+        <div class="aspect-[3/4] w-full rounded-xl overflow-hidden ring-1 ring-white/10">
+          <object id="pdfViewer" data="" type="application/pdf" width="100%" height="100%"></object>
+        </div>
+      </div>
+
+      <!-- Skeleton while resolving URL -->
+      <div id="skeleton" class="mt-6 h-64 rounded-xl bg-white/5 shimmer"></div>
+
+      <div class="mt-4 flex items-center justify-between text-xs text-white/60">
+        <span>Ultimo aggiornamento: <time id="now"></time></span>
+        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+          <input id="autoOpenToggle" type="checkbox" class="accent-amber-400" />
+          <span>Apri automaticamente quando possibile</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Help / Note -->
+    <section class="mt-8 text-white/70 text-sm space-y-2">
+      <p><strong>Nota:</strong> per aprire direttamente il PDF alla scansione, usa il link con <code>?auto=1</code>. Esempio: <code>https://tuo-dominio/menu-qrcode/index.html?auto=1</code>.</p>
+      <p>Per vedere il bottone Admin nella stessa pagina, usa <code>?admin=1</code> (es: <code>…/index.html?admin=1</code>). Puoi combinarli: <code>?auto=1&admin=1</code>.</p>
+      <details class="open:bg-white/5 open:ring-1 open:ring-white/10 open:rounded-xl p-4">
+        <summary class="cursor-pointer text-white">Configurazione (Supabase Storage pubblico)</summary>
+        <ul class="list-disc pl-5 mt-2 space-y-1">
+          <li>Imposta gli attributi <code>data-supabase-url</code>, <code>data-bucket</code> e opzionalmente <code>data-object</code> sull’elemento <code>#menuConfig</code> qui sotto.</li>
+          <li>Il bucket deve essere <em>public</em> e il file si chiama di default <strong>current.pdf</strong>.</li>
+          <li>Il link generato è: <code>${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${OBJECT}</code>.</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+
+  <!-- Config: Sostituisci con i tuoi valori -->
+  <div id="menuConfig"
+       data-supabase-url="https://YOUR-PROJECT-ID.supabase.co"
+       data-bucket="menu"
+       data-object="current.pdf"
+       class="hidden"></div>
+
+  <script>
+    (function(){
+      const $ = (s) => document.querySelector(s);
+      const cfgEl = $('#menuConfig');
+      const SUPABASE_URL = cfgEl?.dataset?.supabaseUrl || '';
+      const BUCKET = cfgEl?.dataset?.bucket || 'menu';
+      const OBJECT = cfgEl?.dataset?.object || 'current.pdf';
+
+      const openBtn = $('#openBtn');
+      const downloadBtn = $('#downloadBtn');
+      const adminBtn = $('#adminBtn');
+      const statusEl = $('#status');
+      const viewerWrap = $('#viewerWrap');
+      const pdfViewer = $('#pdfViewer');
+      const skeleton = $('#skeleton');
+      const autoToggle = $('#autoOpenToggle');
+
+      // stamp now
+      const nowEl = $('#now');
+      nowEl.textContent = new Date().toLocaleString('it-IT');
+
+      const url = [SUPABASE_URL, 'storage', 'v1', 'object', 'public', BUCKET, OBJECT]
+        .filter(Boolean)
+        .join('/');
+
+      const valid = /^https?:\/\//.test(SUPABASE_URL);
+
+      function showViewer(){
+        if (!url) return;
+        viewerWrap.classList.remove('hidden');
+        pdfViewer.setAttribute('data', url);
+      }
+
+      function doneLoading(msg){
+        skeleton.classList.add('hidden');
+        statusEl.textContent = msg || 'Pronto.';
+      }
+
+      function tryAutoOpen(){
+        const params = new URLSearchParams(location.search);
+        const wantsAuto = params.get('auto') === '1' || autoToggle.checked;
+        if (wantsAuto && url){
+          setTimeout(() => { location.assign(url); }, 120);
+        }
+      }
+
+      // Init
+      if (!valid){
+        doneLoading('Configura SUPABASE_URL per generare il link del menù.');
+        openBtn.disabled = true;
+      } else {
+        // Prepare buttons
+        openBtn.addEventListener('click', () => location.assign(url));
+        downloadBtn.classList.remove('hidden');
+        downloadBtn.setAttribute('href', url);
+
+        // Admin button visibile solo con ?admin=1
+        const params = new URLSearchParams(location.search);
+        if (params.get('admin') === '1') {
+          adminBtn.classList.remove('hidden');
+        }
+
+        // Show embedded PDF as fallback/preview (kept for UX)
+        showViewer();
+        doneLoading('Link generato correttamente.');
+        tryAutoOpen();
+      }
+
+      // Persist toggle in localStorage
+      const key = 'menu:autoOpen';
+      if (localStorage.getItem(key) === '1') autoToggle.checked = true;
+      autoToggle.addEventListener('change', (e) => {
+        localStorage.setItem(key, e.target.checked ? '1' : '0');
+      });
+    })();
+  </script>
+</body>
+</html>
